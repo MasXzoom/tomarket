@@ -1,7 +1,5 @@
 # Otomatisasi Bot Tomarket 🚀
 
-Otomatisasikan tugas harian Anda di Tomarket dengan mudah! Skrip Python ini membantu Anda mengotomatisasi klaim harian, memulai farming, bermain game, dan mengklaim hadiah menggunakan API Tomarket, semuanya dengan beberapa langkah sederhana.
-
 ## 🌟 Fitur
 
 - **💰 Saldo Akun & Tiket:** Ambil dan tampilkan saldo akun serta tiket game yang tersedia secara otomatis.
