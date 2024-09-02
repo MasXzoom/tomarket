@@ -22,6 +22,6 @@ Otomatisasikan tugas harian Anda di Tomarket dengan mudah! Skrip Python ini memb
 ### 1. Clone Repositori
 
 ```bash
-git clone https://github.com/username/tomarket-bot-automation.git
-cd tomarket-bot-automation
+git clone https://github.com/MasXzoom/tomarket
+cd tomarket
 ```
