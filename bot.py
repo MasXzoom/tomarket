@@ -79,7 +79,7 @@ def claim_game_points(auth_token, points):
 
 def main():
     try:
-        with open('peler.txt', 'r') as file:
+        with open('query.txt', 'r') as file:
             token_list = [line.strip() for line in file]
     except FileNotFoundError:
         print(f"{Fore.RED}⚠️ ERROR: The token file was not found.")
