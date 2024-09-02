@@ -2,7 +2,7 @@ import requests
 import time
 from colorama import Fore, Style, init
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 
 init(autoreset=True)
@@ -67,7 +67,7 @@ def start_game(auth_token):
 
 def claim_game_points(auth_token, points):
     claim_url = 'https://api-web.tomarket.ai/tomarket-game/v1/game/claim'
-    http_headers['Authorization'] = auth_token
+    http_headers['Authorization'] = token
     payload_data = {"game_id": "59bcd12e-04e2-404c-a172-311a0084587d", "points": points}
     try:
         result = requests.post(claim_url, headers=http_headers, json=payload_data)
@@ -76,6 +76,17 @@ def claim_game_points(auth_token, points):
     except requests.exceptions.RequestException as err:
         print(f"✖️ Point claim failed: {err}")
         return None
+
+def countdown(seconds):
+    while seconds > 0:
+        hrs, remainder = divmod(seconds, 3600)
+        mins, secs = divmod(remainder, 60)
+        timeformat = f'{hrs:02}:{mins:02}:{secs:02}'
+        print(f'\r{" " * 30}', end='')
+        print(f'\r{" " * 3}⏳ Waiting: {timeformat}', end='', flush=True)
+        time.sleep(1)
+        seconds -= 1
+    print('\n🔔 Time to perform the next action!')
 
 def main():
     try:
@@ -95,7 +106,7 @@ def main():
         balance_info = fetch_balance(token)
         if balance_info:
             balance_amount = balance_info['data'].get('available_balance', 'N/A')
-            tickets_available = balance_info['data'].get('play_passes', 'N/A')
+            tickets_available = balance_info['data'].get('play_passes', 0)
             print(f"   💰 Balance: {balance_amount} | 🎫 Tickets: {tickets_available}")
         
             print(f"   📅 Claiming daily reward...")
@@ -110,27 +121,38 @@ def main():
             farming_info = initiate_farming(token)
             if farming_info:
                 print(f"   🚜 Farming started!")
+                end_time = farming_info['data'].get('end_at', 0)
+                end_datetime = datetime.fromtimestamp(end_time)
+
+                while tickets_available > 0:
+                    print(f"   🎮 Starting game (Tickets left: {tickets_available})...")
+                    game_info = start_game(token)
+                    if game_info:
+                        print(f"   🎯 Game launched! Awaiting results...")
+                        time.sleep(30)
+                        random_points = random.randint(400, 600)
+                        claim_info = claim_game_points(token, random_points)
+                        if claim_info:
+                            print(f"   🥇 Points claimed: {random_points}")
+                            tickets_available -= 1
+                        else:
+                            print(f"   ❌ Failed to claim points.")
+                            break
+                    else:
+                        print(f"   ❌ Game could not be started.")
+                        break
+                
+                if tickets_available == 0:
+                    wait_seconds = max(0, int((end_datetime - datetime.now()).total_seconds()))
+                    countdown(wait_seconds)
+                    print(f"   🌾 Time to claim farming rewards.")
             else:
                 print(f"   ❌ Failed to initiate farming.")
-
-            print(f"   🎮 Starting game...")
-            game_info = start_game(token)
-            if game_info:
-                print(f"   🎯 Game launched! Awaiting results...")
-                time.sleep(30)
-                random_points = random.randint(400, 600)
-                claim_info = claim_game_points(token, random_points)
-                if claim_info:
-                    print(f"   🥇 Points claimed: {random_points}")
-                else:
-                    print(f"   ❌ Failed to claim points.")
-            else:
-                print(f"   ❌ Game could not be started.")
         else:
             print(f"   ⚠️ Balance retrieval failed.")
 
     print(f"{Fore.BLUE}✨ Processing of all accounts completed. ✨")
-    time.sleep(1800)
+    countdown(1800)
 
 if __name__ == "__main__":
     main()
